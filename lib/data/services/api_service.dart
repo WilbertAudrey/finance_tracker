@@ -8,4 +8,16 @@ class ApiService {
     final res = await _dio.get('/accounts');
     return (res.data as List).map((e) => Account.fromJson(e)).toList();
   }
+
+  Future<void> addAccount(String name, double balance) async {
+  try {
+    await _dio.post('/accounts', data: {
+      'name': name,
+      'balance': balance,
+    });
+  } catch (e) {
+    throw Exception("Gagal menambahkan akun: ${e.toString()}");
+  }
+}
+
 }

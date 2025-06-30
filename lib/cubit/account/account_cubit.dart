@@ -19,4 +19,15 @@ class AccountCubit extends Cubit<AccountState> {
       emit(AccountError(e.toString()));
     }
   }
+
+  Future<void> addAccount(String name, double balance) async {
+  try {
+    await api.addAccount(name, balance);
+    await fetchAccounts(); // refresh data setelah menambahkan akun
+  } catch (e) {
+    // jangan lempar exception, cukup print dan/atau log
+    print("Error saat menambahkan akun: $e");
+  }
+}
+
 }
