@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # finance_tracker_app
 
 A new Flutter project.
@@ -14,3 +15,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# finance_tracker
+Flutter Finance Tracker Project
+>>>>>>> dfdebc09f944ef664a5a55fa5f689f90dd819d0b
