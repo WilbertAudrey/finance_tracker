@@ -1,14 +1,17 @@
-import 'package:finance_tracker_app/cubit/account/account_cubit.dart';
-import 'package:finance_tracker_app/data/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'presentation/pages/dashboard_page.dart';
-import 'presentation/pages/account_page.dart';
+import 'package:finance_tracker_app/cubit/account/account_cubit.dart';
+import 'package:finance_tracker_app/cubit/income/income_cubit.dart';
+import 'package:finance_tracker_app/data/services/api_service.dart';
+import 'package:finance_tracker_app/presentation/pages/dashboard_page.dart';
 
 void main() {
   runApp(
-    BlocProvider(
-      create: (_) => AccountCubit(ApiService())..fetchAccounts(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AccountCubit(ApiService())..fetchAccounts()),
+        BlocProvider(create: (_) => IncomeCubit(ApiService())..fetchRecentIncome()), // pastikan method ini ada
+      ],
       child: const MyApp(),
     ),
   );
@@ -21,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Finance Tracker',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFFF3F4F6),

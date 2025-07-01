@@ -1,11 +1,13 @@
+import 'package:finance_tracker_app/presentation/widgets/add_income_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../cubit/account/account_cubit.dart';
 import '../../data/services/api_service.dart';
-import 'account_page.dart';
-import 'add_account_dialog.dart';
+import '../pages/account_page.dart';
+import '../pages/add_account_dialog.dart';
+import '../widgets/income_card.dart'; // import IncomeCard
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -22,10 +24,15 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _onAddIncome() {
-    print("Add Income");
-  }
+  showDialog(
+    context: context,
+    builder: (_) => const AddIncomeDialog(),
+  );
+}
+
 
   void _onAddExpense() {
+    // TODO: Tambah navigasi halaman tambah expense
     print("Add Expense");
   }
 
@@ -46,7 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Finance Dashboard'), backgroundColor: const Color.fromARGB(255, 210, 210, 211),),
+      appBar: AppBar(title: const Text('Finance Dashboard')),
       body: BlocBuilder<AccountCubit, AccountState>(
         builder: (context, state) {
           if (state is AccountLoading) {
@@ -54,128 +61,146 @@ class _DashboardPageState extends State<DashboardPage> {
           } else if (state is AccountLoaded) {
             final showMoreButton = state.accounts.length > 4;
 
-            return Padding(
+            return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: Colors.grey[50],
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // === Card: My Accounts ===
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    color: Colors.grey[50],
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Expanded(
-                            child: Text(
-                              'My Accounts',
-                              style: GoogleFonts.poppins(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (showMoreButton)
-                            TextButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const AccountPage(),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'My Accounts',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
                                   ),
-                                );
-                              },
-                              icon: const Icon(Icons.more_horiz, size: 16),
-                              label: const Text("More"),
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
+                              if (showMoreButton)
+                                TextButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const AccountPage(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.more_horiz, size: 16),
+                                  label: const Text("More"),
+                                  style: TextButton.styleFrom(
+                                    padding:
+                                        const EdgeInsets.symmetric(horizontal: 8),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount:
+                                state.accounts.length > 4 ? 4 : state.accounts.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              childAspectRatio: 5.8,
                             ),
+                            itemBuilder: (context, index) {
+                              final acc = state.accounts[index];
+                              final color = Colors
+                                  .primaries[index % Colors.primaries.length]
+                                  .shade100;
+                              final iconBg = Colors
+                                  .primaries[index % Colors.primaries.length]
+                                  .shade400;
+
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 2,
+                                      offset: const Offset(1, 1),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(6),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: iconBg,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.account_balance_wallet_rounded,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            acc.name,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            currencyFormatter.format(acc.balance),
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 9,
+                                              color: Colors.green[700],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: state.accounts.length > 4 ? 4 : state.accounts.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                          childAspectRatio: 5.8,
-                        ),
-                        itemBuilder: (context, index) {
-                          final acc = state.accounts[index];
-                          final color = Colors.primaries[index % Colors.primaries.length].shade100;
-                          final iconBg = Colors.primaries[index % Colors.primaries.length].shade400;
-
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: color,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 2,
-                                  offset: const Offset(1, 1),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(6),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    color: iconBg,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.account_balance_wallet_rounded,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        acc.name,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 1),
-                                      Text(
-                                        currencyFormatter.format(acc.balance),
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 9,
-                                          color: Colors.green[700],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+
+                  const SizedBox(height: 16),
+
+                  // === Card: Recent Income ===
+                  const IncomeCard(), // Modular income card
+                ],
               ),
             );
           } else if (state is AccountError) {
@@ -184,6 +209,8 @@ class _DashboardPageState extends State<DashboardPage> {
           return const SizedBox.shrink();
         },
       ),
+
+      // === FLOATING BUTTONS ===
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,

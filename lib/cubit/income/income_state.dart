@@ -1,6 +1,29 @@
-part of 'income_cubit.dart';
+import 'package:equatable/equatable.dart';
+import '../../data/models/income_model.dart';
 
-@immutable
-sealed class IncomeState {}
+abstract class IncomeState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
-final class IncomeInitial extends IncomeState {}
+class IncomeInitial extends IncomeState {}
+
+class IncomeLoading extends IncomeState {}
+
+class IncomeLoaded extends IncomeState {
+  final List<Income> incomes;
+
+  IncomeLoaded(this.incomes);
+
+  @override
+  List<Object?> get props => [incomes];
+}
+
+class IncomeError extends IncomeState {
+  final String message;
+
+  IncomeError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
