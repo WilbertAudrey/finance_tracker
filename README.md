@@ -1,21 +1,28 @@
-<<<<<<< HEAD
-# finance_tracker_app
+# 💸 Finance Tracker App
 
-A new Flutter project.
+**Finance Tracker** adalah aplikasi mobile sederhana berbasis Flutter yang membantu pengguna dalam mencatat dan mengelola data keuangan seperti akun, pemasukan (income), dan pengeluaran (expense). Aplikasi ini menggunakan **Cubit (flutter_bloc)** sebagai state management dan terhubung ke backend **REST API** menggunakan **Dio**.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Fitur Utama
 
-A few resources to get you started if this is your first Flutter project:
+- ✅ Menampilkan daftar akun dengan saldo
+- ➕ Menambah akun baru secara langsung dari aplikasi
+- 📋 Melihat semua akun secara rinci
+- 🔁 State management menggunakan Cubit (Bloc)
+- 🌐 Terhubung ke backend REST API (Node.js/Express, dsb)
+- 🎨 UI minimalis dan modern (Google Fonts, Grid Layout)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# finance_tracker
-Flutter Finance Tracker Project
->>>>>>> dfdebc09f944ef664a5a55fa5f689f90dd819d0b
+## 🧱 Teknologi yang Digunakan
+
+| Layer       | Teknologi                 |
+|-------------|---------------------------|
+| UI/Frontend | Flutter, Google Fonts     |
+| State Mgmt  | flutter_bloc (Cubit)      |
+| Networking  | Dio                       |
+| Backend     | REST API (Express/Node.js)|
+| Formatter   | intl (untuk format Rupiah)|
+
+---
