@@ -6,13 +6,20 @@ import 'package:finance_tracker_app/data/services/api_service.dart';
 import 'package:finance_tracker_app/presentation/pages/dashboard_page.dart';
 
 void main() {
+  final apiService = ApiService();
+
   runApp(
-    MultiBlocProvider(
+    MultiRepositoryProvider(
       providers: [
-        BlocProvider(create: (_) => AccountCubit(ApiService())..fetchAccounts()),
-        BlocProvider(create: (_) => IncomeCubit(ApiService())..fetchRecentIncome()), // pastikan method ini ada
+        RepositoryProvider<ApiService>(create: (_) => apiService),
       ],
-      child: const MyApp(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => AccountCubit(apiService)..fetchAccounts()),
+          BlocProvider(create: (_) => IncomeCubit(apiService)..fetchIncomes()),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }

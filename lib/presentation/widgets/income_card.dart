@@ -1,9 +1,9 @@
-import 'package:finance_tracker_app/cubit/income/income_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../cubit/income/income_cubit.dart';
-import '../../presentation/pages/income_page.dart';
+import '../../cubit/income/income_state.dart';
+import '../pages/income_page.dart';
 
 class IncomeCard extends StatelessWidget {
   const IncomeCard({super.key});
@@ -16,7 +16,7 @@ class IncomeCard extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         } else if (state is IncomeLoaded) {
           final incomes = state.incomes.take(10).toList();
-          final showMore = state.incomes.length > 10;
+
           final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
           final dateFormatter = DateFormat('dd MMM yyyy');
 
@@ -24,7 +24,9 @@ class IncomeCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -42,16 +44,17 @@ class IncomeCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (showMore)
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const IncomePage()),
-                              );
-                            },
-                            child: const Text("More"),
-                          ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const IncomePage(),
+                              ),
+                            );
+                          },
+                          child: const Text("More"),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -65,76 +68,49 @@ class IncomeCard extends StatelessWidget {
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Index Number
-                            CircleAvatar(
-                              radius: 14,
-                              backgroundColor: Colors.green.shade100,
-                              child: Text(
-                                '${index + 1}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            // Main content
-                            Expanded(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Left Column: Bank + Date
-                                  SizedBox(
-                                    width: 100,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.accountName,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          dateFormatter.format(item.createdAt),
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  // Middle Column: Category + Note
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.category ?? 'No Category',
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                        Text(
-                                          item.note?.isNotEmpty == true ? item.note! : 'No Note',
-                                          style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                            Text(
+                              '${index + 1}.',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            // Amount
-                            Text(
-                              currency.format(item.amount),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.green,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.accountName,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        currency.format(item.amount),
+                                        style: const TextStyle(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    dateFormatter.format(item.createdAt),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${item.category ?? '-'} - ${item.note ?? '-'}',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ],
                               ),
                             ),
                           ],

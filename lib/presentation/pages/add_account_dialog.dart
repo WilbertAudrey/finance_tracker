@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../cubit/account/account_cubit.dart';
@@ -13,6 +14,7 @@ class AddAccountDialog extends StatefulWidget {
 class _AddAccountDialogState extends State<AddAccountDialog> {
   final nameController = TextEditingController();
   final balanceController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
   @override
@@ -23,41 +25,33 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   }
 
   Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
     final name = nameController.text.trim();
-    final balanceText = balanceController.text.trim();
-
-    if (name.isEmpty || balanceText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama dan saldo tidak boleh kosong')),
-      );
-      return;
-    }
-
-    final balance = double.tryParse(balanceText);
-    if (balance == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Saldo harus berupa angka')),
-      );
-      return;
-    }
+    final balance = double.parse(balanceController.text.trim());
 
     setState(() => isLoading = true);
 
     try {
-      print('[DEBUG] Menambahkan akun: $name - $balance');
       await context.read<AccountCubit>().addAccount(name, balance);
 
       if (context.mounted) {
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Akun berhasil ditambahkan')),
+          const SnackBar(
+            content: Text('Akun berhasil ditambahkan'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
-        Navigator.pop(context); // hanya close kalau sukses
       }
     } catch (e) {
-      print('[ERROR] Gagal tambah akun: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menambahkan akun: $e')),
+          SnackBar(
+            content: Text('Gagal menambahkan akun: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -68,71 +62,86 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Stack(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                    'Tambah Akun Baru',
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nama Akun',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: balanceController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Saldo Awal',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Batal'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : _submit,
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Simpan'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+              Text(
+                'Tambah Akun Baru',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey[800],
                 ),
               ),
+              const SizedBox(height: 20),
+
+              /// Nama Akun
+              TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nama Akun',
+                  prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Nama akun tidak boleh kosong' : null,
+              ),
+              const SizedBox(height: 16),
+
+              /// Saldo Awal
+              TextFormField(
+                controller: balanceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
+                decoration: InputDecoration(
+                  labelText: 'Saldo Awal',
+                  prefixText: "Rp ",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Saldo awal tidak boleh kosong';
+                  }
+                  final parsed = double.tryParse(value.trim());
+                  if (parsed == null) return 'Saldo harus berupa angka';
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: isLoading ? null : () => Navigator.pop(context),
+                      child: const Text('Batal'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Text('Simpan'),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
